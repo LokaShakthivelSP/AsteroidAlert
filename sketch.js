@@ -2,6 +2,7 @@ var ply,asts,coin,life=3;
 //var edges=[];
 var gameState=-1;
 var score=0,noCoins=0;
+var plyState=0,disLeft;
 
 function preload(){
   ast1Img=loadImage("ast1.png");
@@ -13,7 +14,7 @@ function preload(){
   explosionAni=loadAnimation("exp1.png","exp2.png","exp3.png","exp4.png","exp5.png");
 
   explode=loadSound("explode.mp3");
-  fly=loadSound("fly.mp3");
+
   win=loadSound("win.mp3");
 
   lifeImg=loadImage("life.png");
@@ -28,19 +29,16 @@ function setup() {
   //edges=createEdgeSprites();
 
   asts=new Group();
+  coins=new Group();
 
   ply=createSprite(displayWidth/2,displayHeight-300);
-  ply.addImage(ply1);
+  if(plyState===0)  ply.addImage(ply1);
   ply.scale=0.25;
 
   explosion=createSprite();
   explosion.addAnimation("explode",explosionAni);
   explosion.visible=false;
 
-  coin=createSprite(random(40,displayWidth-50),random(ply.y+200,-displayHeight*3-200));
-  coin.addImage(coinImg);
-  coin.scale=0.2;
-  coin.visible=false;
 
 }
 
@@ -51,6 +49,12 @@ function draw() {
   camera.position.y=ply.y;
 
   drawSprites();
+
+  disLeft=1702+ply.y;
+
+  if(gameState!=-1) lifes();
+  if(score>=5000)   plyState=1; 
+  if(plyState===1)  ply.addImage(ply2);
 
   fill(255);
 
@@ -64,18 +68,25 @@ function draw() {
     stroke(0);
     strokeWeight(2);
     textAlign(CENTER);
-    textSize(30);
-    text("Welcome to ASTEROID ALERT!!!",displayWidth/2,displayHeight/2.2);
+    textSize(40);
+    textStyle(BOLD);
+    text("ASTEROID ALERT!!!",displayWidth/2,displayHeight/2.2);
     textSize(20);
     text("Hi! You are a astronaut who is about to cross the astroid belt.",displayWidth/2,displayHeight/2+50);
-    text("Use arrow keys to control the spaceship.",displayWidth/2,displayHeight/2+70);
-    text("Cross the asteroid belt without crashing to earn 1000 points.",displayWidth/2,displayHeight/2+90);
-    text("Collect coins as much as you can to boost your points.",displayWidth/2,displayHeight/2+110);
-    text("Earn 5000 points to upgrade your spaceship.",displayWidth/2,displayHeight/2+130);
-    text("Wear your seat belts and get ready for your space flight.",displayWidth/2,displayHeight/2+150);
+    text("Use arrow keys to control the spaceship.",displayWidth/2,displayHeight/2+80);
+    text("Cross the asteroid belt without crashing to earn 1000 points.",displayWidth/2,displayHeight/2+110);
+    text("Collect coins as much as you can to boost your points.",displayWidth/2,displayHeight/2+140);
+    text("Earn 5000 points to upgrade your spaceship.",displayWidth/2,displayHeight/2+170);
+    text("Wear your seat belts and get ready for your space flight.",displayWidth/2,displayHeight/2+200);
     textSize(25);
-    text("Good Luck!!",displayWidth/2,displayHeight/2+190);
-    text("Press SPACE",displayWidth/2,displayHeight/2+220);
+    text("Good Luck!!",displayWidth/2,displayHeight/2+240);
+    text("Press SPACE",displayWidth/2,displayHeight/2+270);
+    imageMode(CENTER);
+    noTint();
+    image(ply1,displayWidth/2-500,displayHeight/2,100,300);
+    image(ply2,displayWidth/2+500,displayHeight/2,100,300);
+    text("Max. Speed - 50 mph",displayWidth/2-500,displayHeight/2+170);
+    text("Max. Speed - 75 mph",displayWidth/2+500,displayHeight/2+170);
     if(keyCode===32){
       gameState=0;
     }
@@ -83,16 +94,22 @@ function draw() {
   //play
   else if(gameState===0){
     ply.visible=true;
-    coin.visible=true;
 
+    stroke(0);
+    strokeWeight(2);
+    textAlign(CENTER);
+    textSize(30);
+    text("Score: "+score,displayWidth/2-200,ply.y-250);
+    text("Number of coins: "+noCoins,displayWidth/2+200,ply.y-250);
+    text("Distance left: "+disLeft,displayWidth/2,ply.y+275)
     spawnAst();
+    spawnCoin();
 
     movePlayer();
-    if(ply.isTouching(coin)){
+    if(ply.isTouching(coins)){
       score+=500;
       noCoins++;
-      coin.x=random(40,displayWidth-50);
-      coin.y=random(ply.y+200,-displayHeight*3-200);
+      coins.destroyEach();
     }
     if(ply.isTouching(asts)){
       gameState=1;
@@ -101,7 +118,7 @@ function draw() {
     }
     if(ply.y<-1700){
       gameState=2;
-      score+=1000;
+      score+=500;
       win.play();
     }
   }
@@ -133,6 +150,9 @@ function draw() {
     strokeWeight(2);
     textAlign(CENTER);
     textSize(30);
+    if(plyState===1){
+      text("Spaceship upgraded!",displayWidth/2,ply.y-100)
+    }
     text("You have successfully crossed the asteroid belt.",displayWidth/2,ply.y-150);
     textSize(25);
     text("Your Score: "+score,displayWidth/2,ply.y+100);
@@ -188,22 +208,39 @@ function spawnAst() {
   }
 }
 
+function spawnCoin(){
+  if(frameCount%75===0){  
+    coin=createSprite(random(40,displayWidth-50),random(ply.y+200,-displayHeight*3-500));
+    coin.addImage(coinImg);
+    coin.scale=0.1;
+    coins.add(coin);
+  }
+}
+
 function movePlayer() {
   if (keyIsDown(UP_ARROW)) {
     ply.y-=5;
-
+    if (plyState===1) {
+      ply.y-=7;
+    }
   }
   if (keyIsDown(DOWN_ARROW)&& ply.y<730) {
     ply.y+=5;
-
+    if (plyState===1) {
+      ply.y+=7;
+    }
   }
   if (keyIsDown(RIGHT_ARROW)) {
     ply.x+=5;
-
+    if (plyState===1) {
+      ply.x+=7;
+    }
   }
   if (keyIsDown(LEFT_ARROW)) {
     ply.x-=5;
-
+    if (plyState===1) {
+      ply.x-=7;
+    }
   }
 }
 
@@ -231,4 +268,19 @@ function reset(){
 function resetPlayer() {
   ply.x=displayWidth/2;
   ply.y=displayHeight-300;
+}
+
+function lifes() {
+  imageMode(CENTER);
+  if(life!=0){
+    if(life>=1){
+      image(lifeImg,displayWidth/2,ply.y-255,20,20);
+      if(life>=2){
+        image(lifeImg,displayWidth/2-25,ply.y-255,20,20);
+        if(life===3){
+          image(lifeImg,displayWidth/2+25,ply.y-255,20,20);
+        }
+      }
+    }
+  }
 }

@@ -15,7 +15,7 @@ function preload(){
   explosionAni=loadAnimation("exp1.png","exp2.png","exp3.png","exp4.png","exp5.png");
 
   explode=loadSound("explode.mp3");
-
+  collect=loadSound("collect.mp3");
   win=loadSound("win.mp3");
 
   lifeImg=loadImage("life.png");
@@ -112,6 +112,7 @@ function draw() {
     if(ply.isTouching(coins)){
       score+=500;
       noCoins++;
+      collect.play();
       coins.destroyEach();
     }
     if(ply.isTouching(asts)){

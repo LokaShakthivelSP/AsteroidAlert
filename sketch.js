@@ -1,4 +1,4 @@
-var ply,asts,coin,life=3;
+var ply,asts,coin,life=5;
 //var edges=[];
 var gameState=-1;
 var score=0,noCoins=0;
@@ -10,6 +10,7 @@ function preload(){
   ast3Img=loadImage("ast3.png");
   ast4Img=loadImage("ast4.png");
   bg=loadImage("bg.jpg");
+  bg2=loadImage("bg2.jpeg");
 
   explosionAni=loadAnimation("exp1.png","exp2.png","exp3.png","exp4.png","exp5.png");
 
@@ -32,7 +33,6 @@ function setup() {
   coins=new Group();
 
   ply=createSprite(displayWidth/2,displayHeight-300);
-  if(plyState===0)  ply.addImage(ply1);
   ply.scale=0.25;
 
   explosion=createSprite();
@@ -43,22 +43,24 @@ function setup() {
 }
 
 function draw() {
-  background(0);
-  image(bg,0,-displayHeight*3+300,displayWidth,displayHeight*4);
+  background(bg2);
+  image(bg,0,-displayHeight*3+300,displayWidth,displayHeight*5);
   camera.position.x=displayWidth/2;
   camera.position.y=ply.y;
 
   drawSprites();
 
-  disLeft=1702+ply.y;
+  disLeft=2202+ply.y;
 
   if(gameState!=-1) lifes();
   if(score>=5000)   plyState=1; 
+
+  if(plyState===0)  ply.addImage(ply1);
   if(plyState===1)  ply.addImage(ply2);
 
   fill(255);
 
-  console.log(life);
+  console.log(ply.y);
 
   //intro
   if(gameState===-1){
@@ -71,10 +73,11 @@ function draw() {
     textSize(40);
     textStyle(BOLD);
     text("ASTEROID ALERT!!!",displayWidth/2,displayHeight/2.2);
+    textStyle(NORMAL);
     textSize(20);
     text("Hi! You are a astronaut who is about to cross the astroid belt.",displayWidth/2,displayHeight/2+50);
     text("Use arrow keys to control the spaceship.",displayWidth/2,displayHeight/2+80);
-    text("Cross the asteroid belt without crashing to earn 1000 points.",displayWidth/2,displayHeight/2+110);
+    text("Cross the asteroid belt without crashing to earn 1500 points.",displayWidth/2,displayHeight/2+110);
     text("Collect coins as much as you can to boost your points.",displayWidth/2,displayHeight/2+140);
     text("Earn 5000 points to upgrade your spaceship.",displayWidth/2,displayHeight/2+170);
     text("Wear your seat belts and get ready for your space flight.",displayWidth/2,displayHeight/2+200);
@@ -85,8 +88,8 @@ function draw() {
     noTint();
     image(ply1,displayWidth/2-500,displayHeight/2,100,300);
     image(ply2,displayWidth/2+500,displayHeight/2,100,300);
-    text("Max. Speed - 50 mph",displayWidth/2-500,displayHeight/2+170);
-    text("Max. Speed - 75 mph",displayWidth/2+500,displayHeight/2+170);
+    text("Max. Speed - 60 mph",displayWidth/2-500,displayHeight/2+170);
+    text("Max. Speed - 80 mph",displayWidth/2+500,displayHeight/2+170);
     if(keyCode===32){
       gameState=0;
     }
@@ -100,7 +103,7 @@ function draw() {
     textAlign(CENTER);
     textSize(30);
     text("Score: "+score,displayWidth/2-200,ply.y-250);
-    text("Number of coins: "+noCoins,displayWidth/2+200,ply.y-250);
+    text("No. of coins: "+noCoins,displayWidth/2+200,ply.y-250);
     text("Distance left: "+disLeft,displayWidth/2,ply.y+275)
     spawnAst();
     spawnCoin();
@@ -116,9 +119,9 @@ function draw() {
       explode.play();
       life-=1;
     }
-    if(ply.y<-1700){
+    if(ply.y<-2200){
       gameState=2;
-      score+=500;
+      score+=1500;
       win.play();
     }
   }
@@ -133,7 +136,7 @@ function draw() {
     strokeWeight(2);
     textAlign(CENTER);
     textSize(30);
-    text("Ohh...! You have crashed. Yet you have "+life+" more chances.",displayWidth/2,ply.y-150);
+    text("Ohh...! You have crashed. Yet you have "+life+" more chance.",displayWidth/2,ply.y-150);
     textSize(25);
     text("Press R",displayWidth/2,ply.y+50);
     if(keyCode===114 && life>0){//R
@@ -173,7 +176,8 @@ function draw() {
     textSize(25);
     text("Your Score: "+score,displayWidth/2,ply.y+100);
     text("Number of Coins collected: "+noCoins,displayWidth/2,ply.y+125);
-    text("Press A to continue",displayWidth/2,ply.y+150);
+    text("Press A to play again",displayWidth/2,ply.y+150);
+    plyState=0;
     if(keyCode===65){//A
       playAgain();
     }
@@ -182,35 +186,62 @@ function draw() {
 }
 
 function spawnAst() {
-  if (frameCount%15===0) {
-    ast1=createSprite(random(40,displayWidth-50),random(ply.y+200,-displayHeight*3));
-    rand=Math.round(random(1,4));
-    switch (rand) {
-      case 1:
-        ast1.addImage(ast1Img);
-        break;
-      case 2:
-        ast1.addImage(ast2Img);
-        break;
-      case 3:
-        ast1.addImage(ast3Img);
-        break;
-      case 4:
-        ast1.addImage(ast4Img);
-        break;
-      default:
-        break;
-    }
-    ast1.scale=0.2;
+  if(plyState===0){
+    if (frameCount%25===0){
+      ast1=createSprite(random(40,displayWidth-50),random(ply.y+200,ply.y-500));
+      rand=Math.round(random(1,4));
+      switch (rand) {
+        case 1:
+          ast1.addImage(ast1Img);
+          break;
+        case 2:
+          ast1.addImage(ast2Img);
+          break;
+        case 3:
+          ast1.addImage(ast3Img);
+          break;
+        case 4:
+          ast1.addImage(ast4Img);
+          break;
+        default:
+          break;
+      }
+      ast1.scale=0.2;
 
-    ast1.velocityX=random(random(-15,-8),random(8,15));
-    asts.add(ast1);
+      ast1.velocityX=random(random(-15,-8),random(8,15));
+      asts.add(ast1);
+    }
+  }else{
+    if (frameCount%15===0){
+      ast1=createSprite(random(40,displayWidth-50),random(ply.y+200,ply.y-500));
+      rand=Math.round(random(1,4));
+      switch (rand) {
+        case 1:
+          ast1.addImage(ast1Img);
+          break;
+        case 2:
+          ast1.addImage(ast2Img);
+          break;
+        case 3:
+          ast1.addImage(ast3Img);
+          break;
+        case 4:
+          ast1.addImage(ast4Img);
+          break;
+        default:
+          break;
+      }
+      ast1.scale=0.2;
+
+      ast1.velocityX=random(random(-15,-8),random(8,15));
+      asts.add(ast1);
+    }
   }
 }
 
 function spawnCoin(){
-  if(frameCount%75===0){  
-    coin=createSprite(random(40,displayWidth-50),random(ply.y+200,-displayHeight*3-500));
+  if(frameCount%45===0){  
+    coin=createSprite(random(40,displayWidth-50),random(ply.y+200,ply.y-300));
     coin.addImage(coinImg);
     coin.scale=0.1;
     coins.add(coin);
@@ -219,27 +250,27 @@ function spawnCoin(){
 
 function movePlayer() {
   if (keyIsDown(UP_ARROW)) {
-    ply.y-=5;
+    ply.y-=6;
     if (plyState===1) {
-      ply.y-=7;
+      ply.y-=8;
     }
   }
   if (keyIsDown(DOWN_ARROW)&& ply.y<730) {
-    ply.y+=5;
+    ply.y+=6;
     if (plyState===1) {
-      ply.y+=7;
+      ply.y+=8;
     }
   }
   if (keyIsDown(RIGHT_ARROW)) {
-    ply.x+=5;
+    ply.x+=6;
     if (plyState===1) {
-      ply.x+=7;
+      ply.x+=8;
     }
   }
   if (keyIsDown(LEFT_ARROW)) {
-    ply.x-=5;
+    ply.x-=6;
     if (plyState===1) {
-      ply.x-=7;
+      ply.x-=8;
     }
   }
 }
@@ -247,13 +278,12 @@ function movePlayer() {
 function continueGame() {
   reset();
   resetPlayer();
-  life=3;
 }
 
 function playAgain() {
   score=0;
   noCoins=0;
-  life=3;
+  life=5;
   reset();
   resetPlayer();
 }
@@ -277,8 +307,14 @@ function lifes() {
       image(lifeImg,displayWidth/2,ply.y-255,20,20);
       if(life>=2){
         image(lifeImg,displayWidth/2-25,ply.y-255,20,20);
-        if(life===3){
+        if(life>=3){
           image(lifeImg,displayWidth/2+25,ply.y-255,20,20);
+          if(life>=4){
+            image(lifeImg,displayWidth/2-50,ply.y-255,20,20);
+            if(life===5){
+              image(lifeImg,displayWidth/2+50,ply.y-255,20,20);
+            }
+          }
         }
       }
     }

@@ -3,6 +3,7 @@ var ply,asts,coin,life=5;
 var gameState=-1;
 var score=0,noCoins=0;
 var plyState=0,disLeft;
+var touches=[];
 
 function preload(){
   ast1Img=loadImage("ast1.png");
@@ -47,10 +48,21 @@ function draw() {
   image(bg,0,-displayHeight*3+300,displayWidth,displayHeight*5);
   camera.position.x=displayWidth/2;
   camera.position.y=ply.y;
+  fill(255);
 
+  if(displayHeight>displayWidth){
+    textSize(25);
+    textAlign(CENTER);
+    stroke(0);
+    strokeWeight(3);
+    text("Use in landscape mode. \n After, Refresh the browser to continue",displayWidth/2,displayHeight/2-100);
+    die();
+  }
   drawSprites();
 
   disLeft=2202+ply.y;
+
+  console.log(touches);
 
   if(gameState!=-1) lifes();
   if(score>=5000)   plyState=1; 
@@ -58,14 +70,10 @@ function draw() {
   if(plyState===0)  ply.addImage(ply1);
   if(plyState===1)  ply.addImage(ply2);
 
-  fill(255);
-
-  console.log(ply.y);
-
   //intro
   if(gameState===-1){
     ply.visible=false;
-    tint(112,112,112);
+    tint(110,110,110);
     image(bg,0,-displayHeight,displayWidth,displayHeight*2);
     stroke(0);
     strokeWeight(2);
@@ -83,14 +91,14 @@ function draw() {
     text("Wear your seat belts and get ready for your space flight.",displayWidth/2,displayHeight/2+200);
     textSize(25);
     text("Good Luck!!",displayWidth/2,displayHeight/2+240);
-    text("Press SPACE",displayWidth/2,displayHeight/2+270);
+    text("Press SPACE / Tap",displayWidth/2,displayHeight/2+270);
     imageMode(CENTER);
     noTint();
     image(ply1,displayWidth/2-500,displayHeight/2,100,300);
     image(ply2,displayWidth/2+500,displayHeight/2,100,300);
     text("Max. Speed - 60 mph",displayWidth/2-500,displayHeight/2+170);
     text("Max. Speed - 80 mph",displayWidth/2+500,displayHeight/2+170);
-    if(keyCode===32){
+    if(keyCode===32 || touches.length>0){
       gameState=0;
     }
   }
@@ -104,9 +112,16 @@ function draw() {
     textSize(30);
     text("Score: "+score,displayWidth/2-200,ply.y-250);
     text("No. of coins: "+noCoins,displayWidth/2+200,ply.y-250);
-    text("Distance left: "+disLeft,displayWidth/2,ply.y+275)
+    text("Distance left: "+disLeft,displayWidth/2,ply.y+275);
+    textSize(15);
+    text("If you are in a mobile,\ntap anywhere on the screen to move the spaceship",displayWidth/2,ply.y-240);
     spawnAst();
     spawnCoin();
+    if(touches.length>0){
+      ply.x=touches[0][0];
+      ply.y=touches[0][1];
+      touches=[];
+    }
 
     movePlayer();
     if(ply.isTouching(coins)){
@@ -139,9 +154,10 @@ function draw() {
     textSize(30);
     text("Ohh...! You have crashed. Yet you have "+life+" more chance.",displayWidth/2,ply.y-150);
     textSize(25);
-    text("Press R",displayWidth/2,ply.y+50);
-    if(keyCode===114 && life>0){//R
+    text("Press R / Tap",displayWidth/2,ply.y+50);
+    if(keyCode===114 || touches.length>0 && life>0){//R
       reset();
+      touches=[];
     }
     if(life===0){
       gameState=3;
@@ -161,9 +177,10 @@ function draw() {
     textSize(25);
     text("Your Score: "+score,displayWidth/2,ply.y+100);
     text("Number of Coins collected: "+noCoins,displayWidth/2,ply.y+125);
-    text("Press W to continue",displayWidth/2,ply.y+150);
-    if(keyCode===119){//W
+    text("Press W to continue / Tap",displayWidth/2,ply.y+150);
+    if(keyCode===119 || touches.length>0){//W
       continueGame();
+      touches=[];
     }
   }
   //over
@@ -177,10 +194,11 @@ function draw() {
     textSize(25);
     text("Your Score: "+score,displayWidth/2,ply.y+100);
     text("Number of Coins collected: "+noCoins,displayWidth/2,ply.y+125);
-    text("Press A to play again",displayWidth/2,ply.y+150);
+    text("Press A to play again / Tap",displayWidth/2,ply.y+150);
     plyState=0;
-    if(keyCode===65){//A
+    if(keyCode===65 || touches.length>0){//A
       playAgain();
+      touches=[];
     }
   }
 
@@ -241,7 +259,7 @@ function spawnAst() {
 }
 
 function spawnCoin(){
-  if(frameCount%45===0){  
+  if(frameCount%40===0){  
     coin=createSprite(random(40,displayWidth-50),random(ply.y+200,ply.y-300));
     coin.addImage(coinImg);
     coin.scale=0.1;
